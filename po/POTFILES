@@ -1,0 +1,7 @@
+data/org.gnome.BubbleLevel.desktop.in
+data/org.gnome.BubbleLevel.appdata.xml.in
+data/org.gnome.BubbleLevel.gschema.xml
+src/window.ui
+src/main.py
+src/window.py
+

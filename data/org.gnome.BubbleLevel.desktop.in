@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=bubble-level
+Exec=bubble-level
+Icon=org.gnome.BubbleLevel
+Terminal=false
+Type=Application
+Categories=GTK;
+StartupNotify=true
