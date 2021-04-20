@@ -5,7 +5,6 @@
     "sdk" : "org.gnome.Sdk",
     "command" : "bubble-level",
     "finish-args" : [
-        "--share=network",
         "--share=ipc",
         "--socket=fallback-x11",
         "--socket=wayland"
@@ -22,6 +21,7 @@
         "*.a"
     ],
     "modules" : [
+    	"python3-requirements.json",
         {
             "name" : "bubble-level",
             "builddir" : true,
