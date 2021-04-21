@@ -119,3 +119,6 @@ class BubbleLevelWindow(Gtk.ApplicationWindow):
         context.stroke()
         context.arc(0.5, 0.5, 0.05, 0.0, 2.0*math.pi)
         context.fill()
+
+    def on_property_change(self, proxy, changed, invalidated, user_data):
+        print(proxy.get_cached_property('AccelerometerOrientation').get_string())
