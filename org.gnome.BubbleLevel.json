@@ -21,7 +21,6 @@
         "*.a"
     ],
     "modules" : [
-    	"python3-requirements.json",
         {
             "name" : "bubble-level",
             "builddir" : true,
