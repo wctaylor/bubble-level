@@ -15,89 +15,107 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk
-
-
-import numpy as np
-from matplotlib.figure import Figure
-from matplotlib.patches import Circle, Ellipse
-from matplotlib.backends.backend_gtk3cairo import (FigureCanvasGTK3Cairo
-                                                   as FigureCanvas)
+import math
+import cairo
+from gi.repository import Gtk, Gdk
 
 @Gtk.Template(resource_path='/org/gnome/BubbleLevel/window.ui')
 class BubbleLevelWindow(Gtk.ApplicationWindow):
     __gtype_name__ = 'BubbleLevelWindow'
 
-    h_container       = Gtk.Template.Child()
-    v_container       = Gtk.Template.Child()
-    circle_container  = Gtk.Template.Child()
-    dpi = 282.45
+    h_area = Gtk.Template.Child()
+    v_area = Gtk.Template.Child()
+    circle_area = Gtk.Template.Child()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.h_area.set_size_request(360, 54)
+        self.v_area.set_size_request(54, 360)
+        self.circle_area.set_size_request(306,306)
 
-        self.plot_horizontal_bubble()
-        self.plot_vertical_bubble()
-        self.plot_circle_bubble()
+        self.h_area.connect("draw", self.on_draw_h)
+        self.v_area.connect("draw", self.on_draw_v)
+        self.circle_area.connect("draw", self.on_draw_circle)
 
-    def plot_horizontal_bubble(self):
-        fig = Figure(figsize=(360/self.dpi, 108/self.dpi), dpi=self.dpi,
-                     frameon=False)
-        ax = fig.add_subplot()
-        canvas = FigureCanvas(fig)
-        canvas.set_size_request(360, 108)
+    # This callback automatically receives the connected drawing area
+    # and a Cairo context
+    def on_draw_h(self, area, context):
+        context.scale(area.get_allocated_width(), area.get_allocated_height())
+        context.set_line_width(0.01)
 
+        pattern = cairo.LinearGradient(0, 1, 0, 0)
+        pattern.add_color_stop_rgba(0, 1,1,0.5, 1)
+        pattern.add_color_stop_rgba(1, 0.2,0.4,0.1, 1)
+        context.rectangle(0, 0, 1, 1)
+        context.set_source(pattern)
+        context.fill()
 
-        center = (0.5, 0.10)
-        bubble = Ellipse(xy=center, width=0.25, height=0.15, angle=0)
-        ax.set(xlim=(0, 1), ylim=(0, 0.2))
-        ax.set_xticks([])
-        ax.set_yticks([])
-        ax.axvline(x=0.35, color='black', linewidth=0.4)
-        ax.axvline(x=0.65, color='black', linewidth=0.4)
-        ax.add_patch(bubble)
+        context.set_source_rgb(0,0,0)
+        context.move_to(0.4, 0)
+        context.line_to(0.4, 1)
+        context.move_to(0.6, 0)
+        context.line_to(0.6, 1)
+        context.stroke()
+        context.save()
 
-        canvas.show()
-        self.h_container.add(canvas)
+        context.translate(0.5, 0.5)
+        context.scale(3/area.get_allocated_width(),
+                      2/area.get_allocated_height())
+        context.arc(0.0, 0.0, 10, 0.0, 2.0 * math.pi)
+        context.restore()
+        context.fill()
 
-    def plot_vertical_bubble(self):
-        fig = Figure(figsize=(108/self.dpi, 360/self.dpi), dpi=self.dpi,
-                     frameon=False)
-        ax = fig.add_subplot()
-        canvas = FigureCanvas(fig)
-        canvas.set_size_request(108, 360)
+    # This callback automatically receives the connected drawing area
+    # and a Cairo context
+    def on_draw_v(self, area, context):
+        context.scale(area.get_allocated_width(), area.get_allocated_height())
+        context.set_line_width(0.01)
 
+        pattern = cairo.LinearGradient(0, 0, 1, 0)
+        pattern.add_color_stop_rgba(0, 1,1,0.5, 1)
+        pattern.add_color_stop_rgba(1, 0.2,0.4,0.1, 1)
+        context.rectangle(0, 0, 1, 1)
+        context.set_source(pattern)
+        context.fill()
 
-        center = (0.1, 0.5)
-        bubble = Ellipse(xy=center, width=0.15, height=0.25, angle=0)
-        ax.set(xlim=(0, 0.2), ylim=(0, 1))
-        ax.set_xticks([])
-        ax.set_yticks([])
-        ax.axhline(y=0.35, color='black', linewidth=0.4)
-        ax.axhline(y=0.65, color='black', linewidth=0.4)
-        ax.add_patch(bubble)
+        context.set_source_rgb(0,0,0)
+        context.move_to(0, 0.4)
+        context.line_to(1, 0.4)
+        context.move_to(0, 0.6)
+        context.line_to(1, 0.6)
+        context.stroke()
+        context.save()
 
-        canvas.show()
-        self.v_container.add(canvas)
+        context.translate(0.5, 0.5)
+        context.scale(2/area.get_allocated_width(),
+                      3/area.get_allocated_height())
+        context.arc(0.0, 0.0, 10, 0.0, 2.0 * math.pi)
+        context.restore()
+        context.fill()
 
-    def plot_circle_bubble(self):
-        fig = Figure(figsize=(252/self.dpi, 252/self.dpi), dpi=self.dpi,
-                     frameon=False)
-        ax = fig.add_subplot()
-        canvas = FigureCanvas(fig)
-        canvas.set_size_request(252, 252)
+    # This callback automatically receives the connected drawing area
+    # and a Cairo context
+    def on_draw_circle(self, area, context):
+        context.scale(area.get_allocated_width(), area.get_allocated_height())
+        context.set_line_width(0.01)
 
-        center = (0.5, 0.5)
-        bubble = Circle(xy=center, radius=0.1)
-        guide  = Circle(xy=center, radius=0.15, fill=False, color='black')
-        ax.set(xlim=(0, 1), ylim=(0, 1))
-        ax.set_xticks([])
-        ax.set_yticks([])
-        ax.axhline(y=0.5, color='black', linewidth=0.4)
-        ax.axvline(x=0.5, color='black', linewidth=0.4)
-        ax.add_patch(bubble)
-        ax.add_patch(guide)
+        pattern = cairo.RadialGradient(0, 0, 0, 0, 0, 1)
+        pattern.add_color_stop_rgba(0, 1,1,0.5, 1)
+        pattern.add_color_stop_rgba(1, 0.2,0.4,0.1, 1)
+        context.arc(0.5, 0.5,
+                    0.45, 0.0, 2.0*math.pi)
+        context.set_source(pattern)
+        context.fill()
 
-        canvas.show()
-        self.circle_container.add(canvas)
+        context.set_source_rgb(0,0,0)
+        context.move_to(0.05, 0.5)
+        context.line_to(0.95, 0.5)
+        context.move_to(0.5, 0.05)
+        context.line_to(0.5, 0.95)
+        context.stroke()
 
+        # context.set_source_rgb(0,0,0)
+        context.arc(0.5, 0.5, 0.1, 0.0, 2.0*math.pi)
+        context.stroke()
+        context.arc(0.5, 0.5, 0.05, 0.0, 2.0*math.pi)
+        context.fill()
