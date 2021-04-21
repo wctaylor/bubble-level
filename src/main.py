@@ -34,6 +34,7 @@ class Application(Gtk.Application):
         win = self.props.active_window
         if not win:
             win = BubbleLevelWindow(application=self)
+        win.set_default_size(360, 648)
         win.present()
 
         # Request a proxy for accessing the sensor service.
