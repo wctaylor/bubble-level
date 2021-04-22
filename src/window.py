@@ -16,7 +16,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import math
-import time
 import cairo
 import subprocess
 from gi.repository import Gtk, Gdk, GObject
@@ -42,11 +41,10 @@ class BubbleLevelWindow(Gtk.ApplicationWindow):
         self.v_area.connect("draw", self.on_draw_v)
         self.circle_area.connect("draw", self.on_draw_circle)
 
-        GObject.timeout_add(2000, self.update)
+        GObject.timeout_add(100, self.update)
 
     def update(self):
         ACCEL = "/sys/bus/iio/devices/iio:device2"
-        THRESH_RAW = 50
         g_m_per_s2 = 9.81
 
         acc_x = subprocess.run(["cat", f"{ACCEL}/in_accel_x_raw"],

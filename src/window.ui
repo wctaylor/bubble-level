@@ -19,6 +19,7 @@
               <object class="GtkDrawingArea" id="h_area">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
+                <property name="margin-top">100 px</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -52,6 +53,7 @@
               <object class="GtkDrawingArea" id="v_area">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
+                <property name="margin-top">10 px</property>
               </object>
               <packing>
                 <property name="expand">False</property>
