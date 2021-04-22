@@ -16,8 +16,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import math
+import time
 import cairo
-from gi.repository import Gtk, Gdk
+import subprocess
+from gi.repository import Gtk, Gdk, GObject
 
 @Gtk.Template(resource_path='/org/gnome/BubbleLevel/window.ui')
 class BubbleLevelWindow(Gtk.ApplicationWindow):
@@ -29,6 +31,9 @@ class BubbleLevelWindow(Gtk.ApplicationWindow):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.h_pos = 0.5
+        self.v_pos = 0.5
+
         self.h_area.set_size_request(360, 54)
         self.v_area.set_size_request(54, 360)
         self.circle_area.set_size_request(306,306)
@@ -36,6 +41,45 @@ class BubbleLevelWindow(Gtk.ApplicationWindow):
         self.h_area.connect("draw", self.on_draw_h)
         self.v_area.connect("draw", self.on_draw_v)
         self.circle_area.connect("draw", self.on_draw_circle)
+
+        GObject.timeout_add(2000, self.update)
+
+    def update(self):
+        ACCEL = "/sys/bus/iio/devices/iio:device2"
+        THRESH_RAW = 50
+        g_m_per_s2 = 9.81
+
+        acc_x = subprocess.run(["cat", f"{ACCEL}/in_accel_x_raw"],
+                                    capture_output=True, text=True)
+        acc_y = subprocess.run(["cat", f"{ACCEL}/in_accel_y_raw"],
+                                capture_output=True, text=True)
+        acc_z = subprocess.run(["cat", f"{ACCEL}/in_accel_z_raw"],
+                                capture_output=True, text=True)
+
+        acc_scale = subprocess.run(["cat", f"{ACCEL}/in_accel_scale"],
+                                    capture_output=True)
+
+        acc_x = int(acc_x.stdout)*float(acc_scale.stdout)
+        acc_y = int(acc_y.stdout)*float(acc_scale.stdout)
+        acc_z = int(acc_z.stdout)*float(acc_scale.stdout)
+
+        # Set readings with magnitude > 1 g equal to 1 g
+        if (abs(acc_x) > g_m_per_s2):
+            acc_x = (acc_x/abs(acc_x))*g_m_per_s2
+        if (abs(acc_y) > g_m_per_s2):
+            acc_y = (acc_y/abs(acc_y))*g_m_per_s2
+        if (abs(acc_z) > g_m_per_s2):
+            acc_z = (acc_z/abs(acc_z))*g_m_per_s2
+
+        self.h_pos = (1/2)*(1 - (acc_x/g_m_per_s2))
+        self.h_area.queue_draw()
+
+        self.v_pos = (1/2)*(1 + (acc_y/g_m_per_s2))
+        self.v_area.queue_draw()
+
+        self.circle_area.queue_draw()
+
+        return True
 
     # This callback automatically receives the connected drawing area
     # and a Cairo context
@@ -58,7 +102,7 @@ class BubbleLevelWindow(Gtk.ApplicationWindow):
         context.stroke()
         context.save()
 
-        context.translate(0.5, 0.5)
+        context.translate(self.h_pos, 0.5)
         context.scale(3/area.get_allocated_width(),
                       2/area.get_allocated_height())
         context.arc(0.0, 0.0, 10, 0.0, 2.0 * math.pi)
@@ -86,7 +130,7 @@ class BubbleLevelWindow(Gtk.ApplicationWindow):
         context.stroke()
         context.save()
 
-        context.translate(0.5, 0.5)
+        context.translate(0.5, self.v_pos)
         context.scale(2/area.get_allocated_width(),
                       3/area.get_allocated_height())
         context.arc(0.0, 0.0, 10, 0.0, 2.0 * math.pi)
@@ -114,11 +158,7 @@ class BubbleLevelWindow(Gtk.ApplicationWindow):
         context.line_to(0.5, 0.95)
         context.stroke()
 
-        # context.set_source_rgb(0,0,0)
         context.arc(0.5, 0.5, 0.1, 0.0, 2.0*math.pi)
         context.stroke()
-        context.arc(0.5, 0.5, 0.05, 0.0, 2.0*math.pi)
+        context.arc(self.h_pos, self.v_pos, 0.05, 0.0, 2.0*math.pi)
         context.fill()
-
-    def on_property_change(self, proxy, changed, invalidated, user_data):
-        print(proxy.get_cached_property('AccelerometerOrientation').get_string())

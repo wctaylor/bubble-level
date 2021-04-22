@@ -37,27 +37,6 @@ class Application(Gtk.Application):
         win.set_default_size(360, 648)
         win.present()
 
-        # Request a proxy for accessing the sensor service.
-        self.proxy = Gio.DBusProxy.new_for_bus_sync(Gio.BusType.SYSTEM,
-                                                    Gio.DBusProxyFlags.NONE,
-                                                    None,
-                                                    'net.hadess.SensorProxy',
-                                                    '/net/hadess/SensorProxy',
-                                                    'net.hadess.SensorProxy',
-                                                    None)
-        self.proxy.connect('g-properties-changed',
-                           win.on_property_change, None)
-        if self.proxy.get_cached_property('HasAccelerometer'):
-            self.proxy.call_sync('ClaimAccelerometer', None,
-                                 Gio.DBusCallFlags.NONE, -1, None)
-
-    def do_shutdown(self):
-        if self.proxy.get_cached_property('HasAccelerometer'):
-            self.proxy.call_sync('ReleaseAccelerometer', None,
-                                 Gio.DBusCallFlags.NONE, -1, None)
-
-
-
 def main(version):
     app = Application()
     return app.run(sys.argv)
