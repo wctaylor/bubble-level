@@ -4,7 +4,7 @@ Bubble level is a digital bubble level (or spirit level) designed with Purism's 
 
 It is still very much a work in progress.
 
-![screenshot](file:///home/will/Pictures/Screenshot from 2021-04-22 11-40-32.png)
+![screenshot](https://github.com/wctaylor/bubble-level/blob/main/screenshots/design.png)
 
 ## Building from Source
 
